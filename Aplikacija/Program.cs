@@ -12,8 +12,10 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
-              .WithOrigins("https://localhost:5555/",
-                           "https://localhost:5555/");
+              .WithOrigins("http://127.0.0.1:5555",
+                           "https://127.0.0.1:5555",
+                           "http://localhost:5268",
+                           "https://localhost:5268");
     });
 });
 
@@ -28,6 +30,13 @@ builder.Services.AddScoped<Connect4Service>();
 builder.Services.AddScoped<GuessTheWordService>(); 
 builder.Services.AddScoped<GameService>(); 
 builder.Services.AddScoped<PlayerInGameService>(); 
+builder.Services.AddScoped<HubService>();
+builder.Services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+                //options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                //options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+            });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -44,5 +53,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<MessageHub>("messageHub");
 
 app.Run();

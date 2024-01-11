@@ -1,4 +1,5 @@
 using Common;
+using Comms;
 using Models; 
 using Interface; 
 
@@ -7,10 +8,12 @@ namespace Services
     public class GameService
     {
         private readonly IUnitOfWOrk unitOfWork; 
+        private HubService hubService;
 
-        public GameService(IUnitOfWOrk unitOfWork)
+        public GameService(IUnitOfWOrk unitOfWork, IHubContext<MessageHub> hub)
         {
             this.unitOfWork = unitOfWork; 
+            this.hubService = new HubService(hub);
         }
 
         /*
@@ -108,7 +111,10 @@ namespace Services
                 game.PlayerInGame!.Add(player_in_game);
 
                 unitOfWork.GameRepository.Update(game);
+
                 await unitOfWork.CompleteAsync();
+
+                await hubService.NotifyOnPlayersChanges(game.ID, "JoinGame", player, player_in_game);
 
                 return game;
             }

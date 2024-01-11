@@ -1,5 +1,7 @@
+using System.Transactions;
 using Interface;
-using Interface.RepositoryInterfaces; 
+using Interface.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Repository
 {
@@ -7,6 +9,7 @@ namespace Repository
     {
 
         private readonly Context context; 
+        private readonly IDbContextTransaction transaction;
         public IConnect4Repo Connect4Repository { get; private set; }
 
         public IGameRepo GameRepository { get; private set; }
@@ -22,6 +25,7 @@ namespace Repository
         public UnitOfWork(Context context)
         {
             this.context = context; 
+            transaction = context.Database.BeginTransaction();
 
             Connect4Repository = new Connect4Repository(context); 
             GameRepository = new GameRepository(context); 
@@ -32,12 +36,22 @@ namespace Repository
         }
         public async Task CompleteAsync()
         {
-            await context.SaveChangesAsync(); 
+            try
+            {
+                await context.SaveChangesAsync();
+                transaction.Commit(); 
+            }
+            catch
+            {
+                transaction.Rollback(); 
+                throw; 
+            }
         }
 
         public void Dispose()
         {
-            context.Dispose(); 
+            transaction.Dispose(); 
+            context.Dispose();
         }
     }
 }
