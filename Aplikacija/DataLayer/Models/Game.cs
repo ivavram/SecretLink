@@ -12,5 +12,5 @@ public class Game
     public GuessTheWordGame? GuessTheWord { get; set; }
     public List<Connect4Game>? Connect4Games { get; set; } = new List<Connect4Game>(); 
     public List<PlayerInGame>? PlayerInGame { get; set; } = new List<PlayerInGame>();
-
+    public bool GameStatus { get; set; }
 }

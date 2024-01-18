@@ -85,7 +85,8 @@ namespace Services
                     NumOfPlayers = 1,
                     PlayerInGame = new List<PlayerInGame> { playerInGame },
                     Connect4Games = new List<Connect4Game> { connect4 },
-                    GuessTheWord = guessTheWord
+                    GuessTheWord = guessTheWord, 
+                    GameStatus = true
                 };
 
                 unitOfWork.GameRepository.Create(game);
@@ -99,7 +100,7 @@ namespace Services
             var game = await unitOfWork.GameRepository.GetGameByTag(game_tag);
             var player = await unitOfWork.PlayerRepository.GetById(playerID);
 
-            if(game == null || player == null || game.NumOfPlayers >= 2 )
+            if(game == null || player == null || game.NumOfPlayers >= 2 || game.GameStatus == false)
                 return null!;
             else
             {
