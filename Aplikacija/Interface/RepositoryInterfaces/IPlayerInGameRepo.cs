@@ -9,9 +9,7 @@ namespace Interface.RepositoryInterfaces
     public interface IPlayerInGameRepo : IBaseRepo<PlayerInGame>
     {
         Task<PlayerInGame> GetByGameIDAndPlayerID(int gameID, int playerID);
-        Task<int> GetGamesWon(int gameID,int playerID);
-
         Task<List<string>> GetPlayersInGame(int gameID); 
-        Task<int> GetGamesWonByPlayer(int gameID, int playerID);
+        Task DeleteComposite(int gameID, int playerID);
     }
 }

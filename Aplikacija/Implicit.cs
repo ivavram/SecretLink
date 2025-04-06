@@ -9,3 +9,6 @@ global using Repository;
 global using Interface; 
 global using Microsoft.AspNetCore.SignalR;
 global using Comms;
+global using SixLabors.ImageSharp;
+global using SixLabors.ImageSharp.Processing;
+global using System.IO;

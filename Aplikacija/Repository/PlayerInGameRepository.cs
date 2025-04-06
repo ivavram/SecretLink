@@ -41,15 +41,6 @@ namespace Repository
             return pg!;
         }
 
-        public async Task<int> GetGamesWon(int gameID, int playerID)
-        {
-            var pg = await dbSet.FirstOrDefaultAsync
-                                (p => p.GameID == gameID && p.PlayerID == playerID);
-            if(pg != null)
-                return pg.GamesWon;
-            return -1;
-        }
-
         public async Task<List<string>> GetPlayersInGame(int gameID)
         {
             var game = await dbSet.Where(g => g.GameID == gameID).Include(g => g.Player).ToListAsync();
@@ -57,13 +48,13 @@ namespace Repository
             return usernames;
 
         }
-
-        public async Task<int> GetGamesWonByPlayer(int gameID, int playerID)
+        public async Task DeleteComposite(int gameID, int playerID)
         {
-            var games_won = await dbSet.Where(d => d.GameID==gameID && d.PlayerID == playerID).FirstOrDefaultAsync();
-            if(games_won != null)
-                return games_won.GamesWon;                
-            return -1;
+            var player_in_game = await dbSet.Where(d => d.GameID==gameID && d.PlayerID == playerID).FirstOrDefaultAsync();
+            if(player_in_game != null)
+            {
+                dbSet.Remove(player_in_game); 
+            }
         }
     }
 }

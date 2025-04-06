@@ -33,21 +33,6 @@ namespace Repository
         {
             return base.GetAll();
         }
-        public async Task<int> GetColumn(int c4ID)
-        {
-            var c4 = await dbSet.FindAsync(c4ID);
-            if(c4 != null)
-                return c4.Column;
-            return -1;
-        }
-
-        public async Task<int> GetRow(int c4ID)
-        {
-            var c4 = await dbSet.FindAsync(c4ID);
-            if(c4 != null)
-                return c4.Row;
-            return -1;
-        }
 
         public async Task<Player> GetWinner(int c4ID)
         {
@@ -58,5 +43,9 @@ namespace Repository
 
             return c4!.Winner!;
         }
+        //public async Task<Connect4Game> GetConnect4Game(int c4ID)
+        //{            var game = await dbSet.Where(p => p. == c4ID && p.Winner == null);
+
+        //}
     }
 }

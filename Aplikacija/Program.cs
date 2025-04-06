@@ -8,18 +8,33 @@ builder.Services.AddDbContext<Context>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("CORS", policy =>
+
+    options.AddPolicy("CORS", builder =>
+    {
+        builder.SetIsOriginAllowed(host => true)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+
+    /*options.AddPolicy("CORS", policy =>
     {
         policy.AllowAnyHeader()
               .AllowAnyMethod()
-              .WithOrigins("http://127.0.0.1:5555",
-                           "https://127.0.0.1:5555",
-                           "http://localhost:5268",
-                           "https://localhost:5268");
-    });
+              .AllowCredentials()
+              .WithOrigins("http://localhost:3000",
+                           "http://127.0.0.1:3000",
+                           "https://localhost:3000",
+                           "https://127.0.0.1:3000"); 
+    });*/
 });
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -30,10 +45,14 @@ builder.Services.AddScoped<Connect4Service>();
 builder.Services.AddScoped<GuessTheWordService>(); 
 builder.Services.AddScoped<GameService>(); 
 builder.Services.AddScoped<PlayerInGameService>(); 
-builder.Services.AddScoped<HubService>();
+//builder.Services.AddScoped<HubService>();
+
+builder.Services.AddSingleton<MessageHub>();
+
 builder.Services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
+                options.MaximumReceiveMessageSize = int.MaxValue;
                 //options.KeepAliveInterval = TimeSpan.FromSeconds(15);
                 //options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
             });

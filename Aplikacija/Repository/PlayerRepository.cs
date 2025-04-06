@@ -42,5 +42,14 @@ namespace Repository
             return player!;
             
         }
+        public async Task<string> GetPasswordByPlayerUsername(string username)
+        {
+            var password = await dbSet
+                    .Where(p => p.Username == username)
+                    .Select(p => p.Password)
+                    .FirstOrDefaultAsync();
+    
+            return password!;
+        }
     }
 }

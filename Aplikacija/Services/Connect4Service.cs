@@ -45,5 +45,19 @@ namespace Services
             else 
                 return p;
         }
+
+        public async Task<Connect4Game> SetWinner(int c4ID, string username)
+        {
+            Connect4Game game = await unitOfWork.Connect4Repository.GetById(c4ID);
+            Player player = await unitOfWork.PlayerRepository.GetPlyerByUsername(username);
+            if(game != null && player != null)
+            {
+                game.Winner = player;
+                await unitOfWork.CompleteAsync();
+                return game;
+            }
+            return null!;
+        }
+        
     }
 }    

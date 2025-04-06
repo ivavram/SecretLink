@@ -21,12 +21,29 @@ namespace Controllers
         }*/
 
         [HttpGet("GetWordInGuessTheWordGame/{guessGID}")]
-        public async Task<ActionResult> GetC4Winner(int guessGID)
+        public async Task<ActionResult> GetWordInGuessTheWordGame(int guessGID)
         {
             var guessW = await guessTheWordService.GetWordInGuessTheWordGame(guessGID); 
             if(guessW == null)
                 return  BadRequest("Neuspesno!"); 
-            return Ok(guessW);
+
+            Random rand = new Random();
+            int length = guessW.Lenght;
+            int index1 = rand.Next(0, length); // Od 0 do length-1
+            int index2;
+
+            // Osigurajte da su indeksi različiti
+            do
+            {
+            index2 = rand.Next(0, length); // Od 0 do length-1
+            } while (index2 == index1);
+            return Ok(new
+            {
+                wordID = guessW.ID,
+                wordToGuess = guessW.WordToGuess,
+                wordLength = guessW.Lenght,
+                RevealedIndexes = new[] { index1, index2 }
+            });
         }
 
         [HttpGet("GetGuessTheWordByID/{guessWordID}")]

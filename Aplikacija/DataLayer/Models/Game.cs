@@ -13,4 +13,5 @@ public class Game
     public List<Connect4Game>? Connect4Games { get; set; } = new List<Connect4Game>(); 
     public List<PlayerInGame>? PlayerInGame { get; set; } = new List<PlayerInGame>();
     public bool GameStatus { get; set; }
+    public bool PublicPrivate { get; set; } // 0 - public, 1 - private
 }

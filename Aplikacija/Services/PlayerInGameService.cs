@@ -21,10 +21,5 @@ namespace Services
             return games!;
             
         }
-        public async Task<int> GetGamesWonByPlayer(int gameID, int playerID)
-        {
-            var games_won = await unitOfWork.PlayerInGameRepository.GetGamesWonByPlayer(gameID, playerID); 
-            return games_won; 
-        }
     }
 }

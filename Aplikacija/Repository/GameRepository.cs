@@ -46,7 +46,12 @@ namespace Repository
 
         public async Task<Game> GetGameByTag(string game_tag)
         {
-            var game = await dbSet.Where(g => g.GameTag == game_tag).FirstOrDefaultAsync();
+            var game = await dbSet
+                    .Include(g => g.GuessTheWord)  // Učitavanje GuessTheWord entiteta
+                        .ThenInclude(gw => gw!.Word)
+                    //.Include(p => p.Connect4Games)
+                    .FirstOrDefaultAsync(g => g.GameTag == game_tag);
+            Console.WriteLine("repo: " + game!.GuessTheWord);
             return game!;  
         }
 
@@ -58,7 +63,23 @@ namespace Repository
             else return null!;
         }
 
-     
+        public async Task<Game> GetPublicGame()
+        {
+            var public_game = await dbSet.Where(game => game.NumOfPlayers < 2 &&
+                                                !game.PublicPrivate && 
+                                                game.GameStatus)
+                                        .FirstOrDefaultAsync();
+            return public_game!;
+        }
+
+        public async Task<Game> GetConnect4Games(int gameID)
+        {
+            var game = await dbSet.Include(p=> p.Connect4Games!)
+                                    .ThenInclude(k => k.Winner)
+                                    .FirstOrDefaultAsync(u => u.ID == gameID &&
+                                    u.Connect4Games!.Any(c => c.Winner == null));
+            return game!;
+        }
     }
     
 }

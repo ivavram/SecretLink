@@ -37,5 +37,14 @@ namespace Controllers
                 return  BadRequest("Ne postoji pobednik ove C4 igre!"); 
             return Ok(player);
         }
+
+        [HttpPut("SetConnect4Winner/{c4ID}/{username}")]
+        public async Task<ActionResult> SetConnect4Winner(int c4ID, string username)
+        {
+            var c4game = await connect4Service.SetWinner(c4ID, username);
+            if(c4game == null)
+                return  BadRequest("Ne postoji pobednik ove C4 igre!");
+            return Ok(c4game);    
+        }
     }
 }

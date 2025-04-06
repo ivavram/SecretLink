@@ -62,14 +62,43 @@ namespace Services
 
         public async Task<Player> GetPlayerByUsername(string username)
         {
-            using (unitOfWork)
+            Player player = await unitOfWork.PlayerRepository.GetPlyerByUsername(username); 
+            if (player != null)
+                player.Password = null!;
+        
+            return player!; 
+            /*using (unitOfWork)
             {
                 Player player = await unitOfWork.PlayerRepository.GetPlyerByUsername(username); 
                 if(player != null)
                     player.Password = null!;
                 
                 return player!; 
-            }
+            }*/
         }
+
+        public async Task<string> GetPasswordByPlayerUsername(string username)
+        {
+           return await unitOfWork.PlayerRepository.GetPasswordByPlayerUsername(username);
+        }
+
+        public async Task<Player> UpdatePlayer(Player player)
+        {
+            Player p = await unitOfWork.PlayerRepository.GetById(player.ID);
+            if (p == null)
+                return null!;
+
+            p.Username = player.Username;
+            if(player.Avatar != null)
+                p.Avatar = player.Avatar;
+            p.Password = CommonMethods.EncryptPassword(player.Password, player.Username);
+    
+            unitOfWork.PlayerRepository.Update(p); 
+    
+            await unitOfWork.CompleteAsync();
+
+            return p;
+        }
+
     }
 }

@@ -1,19 +1,20 @@
 using Common;
 using Comms;
 using Models; 
-using Interface; 
+using Interface;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Services
 {
     public class GameService
     {
         private readonly IUnitOfWOrk unitOfWork; 
-        private HubService hubService;
+        //private HubService hubService;
 
         public GameService(IUnitOfWOrk unitOfWork, IHubContext<MessageHub> hub)
         {
             this.unitOfWork = unitOfWork; 
-            this.hubService = new HubService(hub);
+            //this.hubService = new HubService(hub);
         }
 
         /*
@@ -40,7 +41,7 @@ namespace Services
         }
         */
 
-        public async Task<Game> CreateGame(int playerID)
+        public async Task<Game> CreateGame(int playerID, bool access_flag)
         {
             using(unitOfWork)
             {
@@ -70,13 +71,7 @@ namespace Services
                     Player = player
                 };
 
-                Connect4Game connect4 = new()
-                {
-                    Row = 0,
-                    Column = 0,
-                   
-                };
-
+                Connect4Game connect4 = new(){};
 
                 Game game = new()
                 {
@@ -86,7 +81,8 @@ namespace Services
                     PlayerInGame = new List<PlayerInGame> { playerInGame },
                     Connect4Games = new List<Connect4Game> { connect4 },
                     GuessTheWord = guessTheWord, 
-                    GameStatus = true
+                    GameStatus = true,
+                    PublicPrivate = access_flag
                 };
 
                 unitOfWork.GameRepository.Create(game);
@@ -115,7 +111,9 @@ namespace Services
 
                 await unitOfWork.CompleteAsync();
 
-                await hubService.NotifyOnPlayersChanges(game.ID, "JoinGame", player, player_in_game);
+                //await hubService.NotifyOnPlayersChanges(game.ID, "JoinGame", player, player_in_game);
+
+                Console.WriteLine("service: " + game!.GuessTheWord);
 
                 return game;
             }
@@ -127,5 +125,97 @@ namespace Services
             return player;
         }
 
+        public async Task<Game> LeaveGame(int gameID, int playerID)
+        {
+            var game = await unitOfWork.GameRepository.GetById(gameID);
+            if(game == null)
+                return null!;
+
+            game.NumOfPlayers -=1;
+
+            if(game.NumOfPlayers == 0)
+                game.GameStatus = false;
+
+            //var players_in_game = await unitOfWork.PlayerInGameRepository.GetByGameIDAndPlayerID(gameID, playerID);
+
+            await unitOfWork.PlayerInGameRepository.DeleteComposite(gameID, playerID);
+
+            await unitOfWork.CompleteAsync();
+            
+            return game;
+
+        }
+        public async Task<Game> GetPublicGame()
+        {
+            var game = await unitOfWork.GameRepository.GetPublicGame();
+            return game;
+        }
+
+        public async Task<Game> GetConnect4Games(int gameID, string username)
+        {
+            var game = await unitOfWork.GameRepository.GetConnect4Games(gameID);
+            var winner = await unitOfWork.PlayerRepository.GetPlyerByUsername(username);
+
+            if(game != null && winner != null)
+            {
+                var connect4GameToUpdate = game.Connect4Games!
+                        .FirstOrDefault(connGame => connGame.Winner == null);
+
+            // Dodelite pobednika samo ako je pronađena igra
+                if (connect4GameToUpdate != null)
+                {
+                    connect4GameToUpdate.Winner = winner;
+                    await unitOfWork.CompleteAsync();
+                }
+            }
+            return game!;
+        }
+
+        public async Task<Game> CheckConnect4Game(int gameID)
+        {
+            // vraca igre gde je winner == null
+            var game = await unitOfWork.GameRepository.GetConnect4Games(gameID); 
+            if(game != null)
+                return game;
+            return null!;
+        }
+
+        public async Task<Game> AddNewConnect4Game(int gameID)
+        {
+            var game = await unitOfWork.GameRepository.GetById(gameID);
+            if(game != null)
+            {
+                Connect4Game connect4 = new() {};
+                game.Connect4Games!.Add(connect4);
+                await unitOfWork.CompleteAsync();
+                return game;
+            }
+            return null!;
+        }
+
+        public async Task<Game> SetGameWinner(int gameID, string playerUsername)
+        {
+            var game = await unitOfWork.GameRepository.GetById(gameID);
+            var player = await unitOfWork.PlayerRepository.GetPlyerByUsername(playerUsername);
+            var c4_game = await unitOfWork.GameRepository.GetConnect4Games(gameID);
+
+            if(game != null && player != null)
+            {
+                game.GameWinner = player;
+
+                if(c4_game != null)
+                {
+                    var connect4GameToUpdate = c4_game.Connect4Games!
+                                .FirstOrDefault(connGame => connGame.Winner == null);
+                    if (connect4GameToUpdate != null)
+                        connect4GameToUpdate.Winner = player;
+                }
+                game.GameStatus = false;
+                await unitOfWork.CompleteAsync();
+                return game;
+
+            }
+            return null!;
+        }
     }
 }

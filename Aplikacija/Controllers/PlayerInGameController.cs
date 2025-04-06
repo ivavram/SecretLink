@@ -23,15 +23,5 @@ namespace Controllers
                 return BadRequest("Neuspesno!"); 
             return Ok(game); 
         }
-
-        [HttpGet("GetGamesWonByPlayer/{gameID}/{playerID}")]
-        public async Task<ActionResult> GetGamesWonByPlayer(int gameID, int playerID)
-        {
-            var num = await playerInGameService.GetGamesWonByPlayer(gameID, playerID);
-            if(num == -1)
-                return BadRequest("Nije pronadjena igra/igrac sa navedenim ID-jem.");
-            else
-                return Ok("Broj pobeda: " + num + ".");
-        }
     }
 }

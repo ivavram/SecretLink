@@ -12,5 +12,7 @@ namespace Interface.RepositoryInterfaces
         Task<Game> GetGamePlayers(int gameID);
         Task<Game> GetGameByTag(string game_tag); 
         Task<Player> GetGameWinner(int gameID);
+        Task<Game> GetPublicGame();
+        Task<Game> GetConnect4Games(int gameID);
     }
 }

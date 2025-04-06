@@ -9,5 +9,6 @@ namespace Interface.RepositoryInterfaces
    public interface IPlayerRepo :IBaseRepo<Player>
    {
         Task<Player> GetPlyerByUsername(string username);
+        Task<string> GetPasswordByPlayerUsername(string username);
    }
 }
